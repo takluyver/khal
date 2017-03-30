@@ -148,6 +148,12 @@ def get_vdirs_from_vdirsyncer_config():
 
 
 def find_vdir():
+    """Use one or more existing vdirs on the system.
+    
+    Tries to get data from vdirsyncer if it's installed and configured, and
+    asks user to confirm it. If not, prompt the user for the path to a single
+    vdir.
+    """
     print("The following collections were found:")
     synced_vdirs = get_vdirs_from_vdirsyncer_config()
     if synced_vdirs:
@@ -208,6 +214,10 @@ password = {password}
 
 
 def vdirsyncer_config_path():
+    """Find where vdirsyncer will look for it's config.
+    
+    There may or may not already be a file at the returned path.
+    """
     fname = environ.get('VDIRSYNCER_CONFIG', None)
     if fname is None:
         fname = normpath(expanduser('~/.vdirsyncer/config'))
@@ -269,6 +279,7 @@ def create_synced_vdir():
 
 
 def start_syncing():
+    """Run vdirsyncer to sync the newly created vdir with the remote."""
     print("Syncing calendar...")
     try:
         exit_code = call(['vdirsyncer', 'discover'])
@@ -287,6 +298,7 @@ def start_syncing():
 
 
 def choose_vdir_calendar():
+    """query the user for their preferred calendar source"""
     choices = [
         ("Create a new calendar on this computer", create_vdir),
         ("Use a calendar already on this computer (vdir format)", find_vdir),
