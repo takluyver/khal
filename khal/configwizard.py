@@ -141,7 +141,7 @@ def get_vdirs_from_vdirsyncer_config():
             # TODO detect type of storage properly
             vdirs.append((storage['instance_name'], storage['path'], 'discover'))
     if vdirs == list():
-        print("No calendards found from vdirsyncer.")
+        print("No calendars found from vdirsyncer.")
         return None
     else:
         return vdirs
