@@ -27,7 +27,7 @@ from functools import partial
 import json
 from itertools import zip_longest
 from os.path import (expanduser, expandvars, join, normpath, exists, isdir,
-    dirname)
+                     dirname)
 from os import makedirs, environ
 from subprocess import call
 
