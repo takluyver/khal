@@ -166,6 +166,8 @@ def calc_day(dayname):
         return today
     if dayname == 'tomorrow':
         return today + timedelta(days=1)
+    if dayname == 'yesterday':
+        return today - timedelta(days=1)
 
     wday = weekdaypstr(dayname)
     days = (wday - today.weekday()) % 7
@@ -375,13 +377,10 @@ def guessrangefstr(daterange, locale, adjust_reasonably=False,
         allday = False
         try:
             # figuring out start
-            if len(start) == 0:
-                raise  # used to be: start = datetime_fillin(end=False)
-            else:
-                split = start.split(" ")
-                start, allday = guessdatetimefstr(split, locale)
-                if len(split) != 0:
-                    continue
+            split = start.split(" ")
+            start, allday = guessdatetimefstr(split, locale)
+            if len(split) != 0:
+                continue
 
             # and end
             if len(end) == 0:
@@ -635,7 +634,9 @@ def ics_from_list(events, tzs, random_uid=False, default_timezone=None):
     """
     calendar = icalendar.Calendar()
     calendar.add('version', '2.0')
-    calendar.add('prodid', '-//CALENDARSERVER.ORG//NONSGML Version 1//EN')
+    calendar.add(
+        'prodid', '-//PIMUTILS.ORG//NONSGML khal / icalendar //EN'
+    )
 
     if random_uid:
         new_uid = generate_random_uid()
