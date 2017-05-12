@@ -26,7 +26,8 @@ import xdg
 from functools import partial
 import json
 from itertools import zip_longest
-from os.path import expanduser, expandvars, join, normpath, exists, isdir
+from os.path import (expanduser, expandvars, join, normpath, exists, isdir,
+                     dirname)
 from os import makedirs, environ
 from subprocess import call
 
@@ -149,7 +150,7 @@ def get_vdirs_from_vdirsyncer_config():
 
 def find_vdir():
     """Use one or more existing vdirs on the system.
-    
+
     Tries to get data from vdirsyncer if it's installed and configured, and
     asks user to confirm it. If not, prompt the user for the path to a single
     vdir.
@@ -215,7 +216,7 @@ password = {password}
 
 def vdirsyncer_config_path():
     """Find where vdirsyncer will look for it's config.
-    
+
     There may or may not already be a file at the returned path.
     """
     fname = environ.get('VDIRSYNCER_CONFIG', None)
@@ -233,7 +234,6 @@ def get_available_pairno():
     """
     try:
         from vdirsyncer.cli import config
-        from vdirsyncer.exceptions import UserError
     except ImportError:
         raise FatalError("vdirsyncer config exists, but couldn't import vdirsyncer.")
     vdir_config = config.load_config()
@@ -241,6 +241,7 @@ def get_available_pairno():
     while 'khal_pair_{}'.format(pairno) in vdir_config.pairs:
         pairno += 1
     return pairno
+
 
 def create_synced_vdir():
     """Create a new vdir, and set up vdirsyncer to sync it.
@@ -268,7 +269,7 @@ def create_synced_vdir():
             f.write(VDS_CONFIG_START)
 
         f.write(VDS_CONFIG_TEMPLATE.format(
-            local_path=json.dumps(path),
+            local_path=json.dumps(dirname(path)),
             url=json.dumps(caldav_url),
             username=json.dumps(username),
             password=json.dumps(password),
@@ -285,16 +286,15 @@ def start_syncing():
         exit_code = call(['vdirsyncer', 'discover'])
     except FileNotFoundError:
         print("Could not find vdirsyncer - please set it up manually")
-        exit_code = 1
     else:
         if exit_code == 0:
             exit_code = call(['vdirsyncer', 'sync'])
         if exit_code != 0:
             print("vdirsyncer failed - please set up sync manually")
 
-    if exit_code == 0:
-        # TODO: add to cron
-        pass
+    # Add code here to check platform and automatically set up cron or similar
+    print("Please set up your system to run 'vdirsyncer sync' periodically, "
+          "using cron or similar mechanisms.")
 
 
 def choose_vdir_calendar():
@@ -346,7 +346,10 @@ def configwizard():
     print()
     timeformat = choose_time_format()
     print()
-    vdirs = choose_vdir_calendar()
+    try:
+        vdirs = choose_vdir_calendar()
+    except OSError as error:
+        raise FatalError(error)
     print()
 
     if not vdirs:
